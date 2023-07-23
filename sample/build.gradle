@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.1'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'me.zeroest.webflux'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'io.projectreactor.tools:blockhound:1.0.8.RELEASE'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+/*
+* https://velog.io/@adduci/%EB%B8%94%EB%A1%9D%ED%95%98%EC%9A%B4%EB%93%9C-%EC%82%AC%EC%9A%A9-%EC%8B%9C-You-need-to-add-XXAllowRedefinitionToAddDeleteMethods-JVM-flag-%EC%97%90%EB%9F%AC
+* blockhound 사용시 내부적으로 런타임에 네이티브 메소드를 변경하여 동작
+* JDK 13 버전 부터 기본적으로 네이티브 메소드 재정의 기능을 제공하지 않음
+* 직접 JVM 의 native method 재정의 기능 옵션을 설정해줘야 기능이 동작
+* */
+tasks.withType(Test).all {
+    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_13)) {
+        jvmArgs += [
+            "-XX:+AllowRedefinitionToAddDeleteMethods"
+        ]
+    }
+}
